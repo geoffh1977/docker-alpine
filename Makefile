@@ -1,33 +1,49 @@
 # Project Makefile
-include container.conf
-export $(shell sed 's/=.*//' container.conf)
+$(shell sed -e 's/^---$$//g; s/^#.*$$//g; /^$$/d; s/:[^:\/\/]/="/g; s/$$/"/g; s/ *=/=/g' config.yml > /tmp/config.vars)
+include /tmp/config.vars
 
-.PHONY: build run build.binary build.container all clean
+.PHONY: all release dockerfile docs build update-version update-repo run clean clean-files clean-all
 
-all: build
+all: update-version dockerfile build docs
 
-build: build.binary build.container
+release: update-version dockerfile docs update-repo
 
-build.binary:
-	@if [ ! -d ${PWD}/container/binaries ] ; then mkdir ${PWD}/container/binaries ; fi
-	@if [ ! -f ${PWD}/container/binaries/rootfs.tar.gz ] ; then rm -f ${PWD}/container/binaries/rootfs.tar.gz ; fi
-	docker build -t ${dockerUser}/alpine:builder --build-arg IMAGE_NAME=${buildImageName} --build-arg IMAGE_VERSION=${buildImageVersion} builder/
-	docker run --rm -v ${PWD}/container/binaries:/tmp/out ${dockerUser}/alpine:builder -E -c -t ${timeZone} -r v${finalImageVersion} -m ${buildBaseUrl}
-	docker rmi -f ${dockerUser}/alpine:builder ${buildImageName}:${buildImageVersion}
+dockerfile:
+	rm -f Dockerfile
+	docker run --rm -v $(shell pwd):/project geoffh1977/jinja2 j2 -f yaml -o Dockerfile templates/Dockerfile.j2 config.yml
 
-build.container:
-	@if [ ! -f ${PWD}/container/binaries/rootfs.tar.gz ] ; then echo No Binary File To Install ; exit 1 ; fi
-	docker build -t ${dockerUser}/${finalImageName}:${finalImageVersion} --build-arg ALPINE_USER=${alpineUser} --build-arg ALPINE_UID=${alpineUid} --build-arg ALPINE_GID=${alpineGid} container/
+docs:
+	rm -f README.md
+	docker run --rm -v $(shell pwd):/project geoffh1977/jinja2 j2 -f yaml -o README.md templates/README.md.j2 config.yml
+	[ ! -z ${license} ] && rm -f LICENSE.md && curl -s -o LICENSE.md https://raw.githubusercontent.com/IQAndreas/markdown-licenses/master/${license}.md
+
+build:
+	docker build -t ${dockerUser}/${finalImageName}:${finalImageVersion} .
 	docker tag ${dockerUser}/${finalImageName}:${finalImageVersion} ${dockerUser}/${finalImageName}:latest
-	@rm -f ${PWD}/container/binaries/rootfs.tar.gz
+	docker tag ${dockerUser}/${finalImageName}:${finalImageVersion} ${dockerUser}/${finalImageName}:${alpineDirVersion}
+	docker tag ${dockerUser}/${finalImageName}:${finalImageVersion} ${dockerUser}/${finalImageName}:${alpineMajorVersion}
+	docker rmi ${buildImageName}:${buildImageVersion}
+
+update-version:
+	scripts/update_version.sh
+
+update-repo:
+	scripts/update_repo.sh
 
 run:
 	$(call colors)
 	@echo -e Starting Container...
-	@docker run -it --rm ${dockerUser}/${finalImageName}:${finalImageVersion}
+	@docker run -it --rm --name ${finalImageName} ${dockerUser}/${finalImageName}:${finalImageVersion}
 	@echo -e Container Stopped
 
 clean:
 	docker rmi -f ${dockerUser}/${finalImageName}:latest
 	docker rmi -f ${dockerUser}/${finalImageName}:${finalImageVersion}
-	if [ ! -f ${PWD}/container/binaries/rootfs.tar.gz ] ; then rm -f ${PWD}/container/binaries/rootfs.tar.gz ; fi
+	docker rmi -f ${dockerUser}/${finalImageName}:${alpineDirVersion}
+	docker rmi -f ${dockerUser}/${finalImageName}:${alpineMajorVersion}
+	rm -f /tmp/config.vars
+
+clean-files:
+	rm -f README.md LICENSE.md Dockerfile
+
+clean-all: clean clean-files

@@ -22,7 +22,7 @@ build() {
   declare mirror="$1" rel="$2" packages="${3:-alpine-base}"
 
   local rootfs
-  rootfs="$(mktemp -d "${TMPDIR:-/var/tmp}/alpine-docker-rootfs-XXXXXXXXXX")"
+  rootfs="/var/tmp/rootfs"
 
   # conf
   mkdir -p "$rootfs/etc/apk"
@@ -47,11 +47,6 @@ build() {
   } >&2
 
   [[ "$ADD_APK_SCRIPT" ]] && cp /apk-install "$rootfs/usr/sbin/apk-install"
-
-  # save
-  if [ ! -d /tmp/out ] ; then mkdir /tmp/out ; fi
-  tar -z -f /tmp/out/rootfs.tar.gz --numeric-owner -C "$rootfs" -c .
-  [[ "$STDOUT" ]] && cat /tmp/out/rootfs.tar.gz
 
   return 0
 }
