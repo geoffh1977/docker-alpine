@@ -2,6 +2,7 @@
 FROM alpine:latest AS build
 
 COPY scripts/mkimage-alpine.bash scripts/apk-install /
+
 RUN chmod u+x /apk-install /mkimage-alpine.bash && \
     sync && \
     /apk-install bash tzdata && \

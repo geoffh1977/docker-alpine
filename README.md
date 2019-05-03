@@ -1,6 +1,6 @@
 # Alpine Linux Base Image Container Build #
 
-![Alpine Logo](https://raw.githubusercontent.com/geoffh1977/docker-alpine/master/images/logo.svg)
+![Alpine Logo](https://raw.githubusercontent.com/geoffh1977/docker-alpine/master/images/logo.png)
 
 ## Description ##
 This repository contains a custom build of an Alpine Linux container built from scratch. The build improves the security of the Alpine Linux base container by:
