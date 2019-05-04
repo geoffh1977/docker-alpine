@@ -35,6 +35,11 @@ echo
 echo "  Pushing Updates To Repository"
 git push origin master > /dev/null
 git push --tags origin > /dev/null
+
+echo
+echo "  Switch Back To Develop"
+git checkout develop
+
 echo
 echo "Repository Successfully Updated"
 echo
