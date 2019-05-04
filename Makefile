@@ -6,7 +6,7 @@ include /tmp/config.vars
 
 all: update-version dockerfile build docs
 
-release: update-version dockerfile docs update-repo
+release: update-version dockerfile docs update-repo clean-files
 
 dockerfile:
 	rm -f Dockerfile
