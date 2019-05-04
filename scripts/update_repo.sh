@@ -18,6 +18,7 @@ fi
 echo "Version ${LOCAL_VERSION} Not Found In Repository. Updating Repository..."
 echo "  Create Release Branch"
 git branch "release/${LOCAL_VERSION}"
+git checkout "release/${LOCAL_VERSION}"
 git add -A :/
 git commit -m "Automated: Create Version ${LOCAL_VERSION}"
 
