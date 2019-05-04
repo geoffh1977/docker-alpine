@@ -23,7 +23,7 @@ git commit -m "Automated: Create Version ${LOCAL_VERSION}"
 
 echo "  Merge Back Into master Branch"
 git checkout master
-git merge "release/${LOCAL_VERSION}" --no-ff --no-edit
+git merge "release/${LOCAL_VERSION}" --no-edit
 
 echo "  Create A New Repository Tag For Version ${LOCAL_VERSION}"
 git tag -a "${LOCAL_VERSION}" -m "${APP_NAME} Container Version ${LOCAL_VERSION}"
