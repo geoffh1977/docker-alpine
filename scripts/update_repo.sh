@@ -16,19 +16,23 @@ fi
 
 # Update Git With New Version
 echo "Version ${LOCAL_VERSION} Not Found In Repository. Updating Repository..."
-echo "  Checking Out Master Branch"
-git checkout master > /dev/null
+echo "  Create Release Branch"
+git branch "release/${LOCAL_VERSION}"
+git add -A :/
+git commit -m "Automated: Create Version ${LOCAL_VERSION}"
 
-echo "  Commiting Changed Files To Local Repository"
-git add -A :/ > /dev/null
-git commit -m "Automated: Updating To Version ${LOCAL_VERSION}" > /dev/null
+echo "  Merge Back Into master Branch"
+git checkout master
+git merge "release/${LOCAL_VERSION}" --no-ff --no-edit
 
 echo "  Create A New Repository Tag For Version ${LOCAL_VERSION}"
-git tag -a "${LOCAL_VERSION}" -m "${APP_NAME} Container Version ${LOCAL_VERSION}" > /dev/null
+git tag -a "${LOCAL_VERSION}" -m "${APP_NAME} Container Version ${LOCAL_VERSION}"
+
+echo "  Remove Release Branch"
+git branch -d "release/${LOCAL_VERSION}"
 
 echo
 echo "  Pushing Updates To Repository"
-echo
 git push origin master > /dev/null
 git push --tags origin > /dev/null
 echo
