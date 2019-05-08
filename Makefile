@@ -6,7 +6,7 @@ include /tmp/config.vars
 
 all: update-version dockerfile build docs
 
-release: update-version dockerfile docs update-repo clean-files
+release: update-version dockerfile docs gitignore-delete update-repo clean-files
 
 dockerfile:
 	rm -f Dockerfile
@@ -29,6 +29,9 @@ update-version:
 
 update-repo:
 	scripts/update_repo.sh
+
+gitignore-delete:
+	rm -f .gitignore
 
 run:
 	$(call colors)
