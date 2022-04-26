@@ -1,0 +1,9 @@
+---
+dockerhub:
+  source:
+    user: _
+    repo: alpine
+
+  target:
+    user: geoffh1977
+    repo: alpine
